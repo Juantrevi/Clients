@@ -14,9 +14,12 @@ public class Producto implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     private String nombre;
 
+
     private Double precio;
+
 
     @Temporal(TemporalType.DATE)
     @Column(name = "create_at")

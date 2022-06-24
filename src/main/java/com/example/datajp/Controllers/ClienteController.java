@@ -39,27 +39,6 @@ public class ClienteController {
 
 
 
-    //Pageable se usa para mostrar una cantidad de registros determinados (Modificar Interfaz y service) y en otro controlador (util.paginator)
-
-    @GetMapping("/listar")
-    public String listar(@RequestParam(value = "page", defaultValue = "0") int page, Model model){
-
-        //Asi es como traemos una cantidad de elementos por pagina
-        Pageable pageRequest = PageRequest.of(page, 4);
-        Page<Cliente> clientes = clienteService.findAll(pageRequest);
-        PageRender<Cliente> pageRender = new PageRender<>("/listar", clientes);
-        //
-
-
-        model.addAttribute("titulo", "Listado de clientes");
-        model.addAttribute("clientes", clientes); //Para traer solo 4
-//        model.addAttribute("clientes", clienteService.findAll()); --> SI QUISIERAMOS TRAER TODA LA LISTA
-        model.addAttribute("page", pageRender);
-        return "listar";
-    }
-
-
-
     @GetMapping("/form")
     public String crear(Model model){
 
@@ -70,8 +49,6 @@ public class ClienteController {
 
         return "form";
     }
-
-
 
     //FUNDAMENTAL PARA LAS VALIDACIONES anotar con @Valid, pero si falla hay que preguntar si contiene errores
     //Hay que cargar la vista del formulario y volver a la plantilla con los mensajes de error, para eso hay que
@@ -94,7 +71,7 @@ public class ClienteController {
                     cliente.getFoto().length() > 0){
 
                 uploadFileService.delete(cliente.getFoto());
-                }
+            }
 
             String uniqueFileName = null;
             try {
@@ -115,7 +92,55 @@ public class ClienteController {
         return "redirect:listar";
     }
 
+    //Pageable se usa para mostrar una cantidad de registros determinados (Modificar Interfaz y service) y en otro controlador (util.paginator)
 
+    @GetMapping("/ver/{id}")
+    public String ver(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash){
+
+        Cliente cliente = clienteService.fetchByIdWithFacturas(id);
+        if (cliente == null){
+            flash.addFlashAttribute("error", "El cliente no existe");
+            return "redirect:/listar";
+        }
+        model.addAttribute("titulo", "Detalle de cliente " + cliente.getNombre());
+        model.addAttribute("cliente", cliente);
+
+        return "ver";
+
+    }
+
+    //De esta forma se puede cargar la imagen de forma mas programatica (Si vemos la url esta, es la que nos manda desde el HTML listar)
+    //de la otra manera lo carga como un recurso, pero hay que configurarlo en el MvcConfig (Ahora comentado)
+    //Es decir, de esta forma lo busca directamente a traves de la respuesta resource, se cargan los recursos y se pasan a la respuesta, anexandolo al body
+    //Ambas formas estan bien, esta solo la carga a traves de una metodo handler
+    @GetMapping(value = "/uploads/{filename:.+}") //el .+ al final es para que no pase el .PNG por ejemplo
+    public ResponseEntity<Resource> verFoto(@PathVariable String filename){
+
+        Resource recurso = null;
+        try {
+            recurso = uploadFileService.load(filename);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"" ).body(recurso);
+    }
+
+    @GetMapping("/listar")
+    public String listar(@RequestParam(value = "page", defaultValue = "0") int page, Model model){
+
+        //Asi es como traemos una cantidad de elementos por pagina
+        Pageable pageRequest = PageRequest.of(page, 4);
+        Page<Cliente> clientes = clienteService.findAll(pageRequest);
+        PageRender<Cliente> pageRender = new PageRender<>("/listar", clientes);
+        //
+
+
+        model.addAttribute("titulo", "Listado de clientes");
+        model.addAttribute("clientes", clientes); //Para traer solo 4
+//        model.addAttribute("clientes", clienteService.findAll()); --> SI QUISIERAMOS TRAER TODA LA LISTA
+        model.addAttribute("page", pageRender);
+        return "listar";
+    }
 
     @GetMapping("/form/{id}")
     public String editar(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash){
@@ -138,8 +163,6 @@ public class ClienteController {
         return "form";
     }
 
-
-
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable(value = "id") Long id, RedirectAttributes flash){
 
@@ -155,42 +178,6 @@ public class ClienteController {
             }
 
         return "redirect:/listar";
-    }
-
-
-
-    @GetMapping("/ver/{id}")
-    public String ver(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash){
-
-        Cliente cliente = clienteService.findOne(id);
-        if (cliente == null){
-            flash.addFlashAttribute("error", "El cliente no existe");
-            return "redirect:/listar";
-        }
-        model.addAttribute("titulo", "Detalle de cliente " + cliente.getNombre());
-        model.addAttribute("cliente", cliente);
-
-        return "ver";
-
-    }
-
-
-
-
-    //De esta forma se puede cargar la imagen de forma mas programatica (Si vemos la url esta, es la que nos manda desde el HTML listar)
-    //de la otra manera lo carga como un recurso, pero hay que configurarlo en el MvcConfig (Ahora comentado)
-    //Es decir, de esta forma lo busca directamente a traves de la respuesta resource, se cargan los recursos y se pasan a la respuesta, anexandolo al body
-    //Ambas formas estan bien, esta solo la carga a traves de una metodo handler
-    @GetMapping(value = "/uploads/{filename:.+}") //el .+ al final es para que no pase el .PNG por ejemplo
-    public ResponseEntity<Resource> verFoto(@PathVariable String filename){
-
-        Resource recurso = null;
-        try {
-            recurso = uploadFileService.load(filename);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"" ).body(recurso);
     }
 
 }

@@ -12,9 +12,11 @@ public class ItemFactura implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     private Integer cantidad;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id") //Aunque se va a relacionar solo, se lo puede dejar de forma explicita, pero se podria omitir
     private Producto producto;
 

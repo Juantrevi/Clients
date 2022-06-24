@@ -24,21 +24,6 @@ public class FacturaController {
     @Autowired
     private IClienteService clienteService;
 
-    @GetMapping("/ver/{id}")
-    public String verFactura(@PathVariable Long id, Model model, RedirectAttributes flash){
-        Factura factura = clienteService.findFacturaById(id);
-
-        if (factura == null){
-            flash.addFlashAttribute("error", "La factura no existe en la base de datos");
-            return "redirect:/listar";
-        }
-        model.addAttribute("titulo", "Factura: " + factura.getDescripcion());
-        model.addAttribute("factura", factura);
-        return "factura/ver";
-    }
-
-
-
     @GetMapping("/form/{clienteId}")
     public String crear(@PathVariable(value = "clienteId") Long clienteId, Model model, RedirectAttributes flash) {
 
@@ -58,12 +43,27 @@ public class FacturaController {
         return "factura/form";
     }
 
-    @GetMapping(value = "/cargar-productos/{term}", produces = {"application/json"})//Mismo mapping que le dimos en /js/autocomplete-producto dentro de ajax,
-                                                                                    // con Jquery. Despues lo que hace
-                                                                                    //Es generar y productir una respuesta JSON.
-                                                                                    //El @ResponseBody lo que hace es suprimir el cargar una
-                                                                                    //vista de Thymeleaf, y en vez de eso toma el resultado y lo convierte en JSON
-    public @ResponseBody List<Producto> cargarProductos(@PathVariable String term){
+    @GetMapping("/ver/{id}")
+    public String verFactura(@PathVariable Long id, Model model, RedirectAttributes flash) {
+        Factura factura = clienteService.fetchByIdWithClienteWithItemFacturaWithProducto(id);//clienteService.findFacturaById(id);
+
+        if (factura == null) {
+            flash.addFlashAttribute("error", "La factura no existe en la base de datos");
+            return "redirect:/listar";
+        }
+        model.addAttribute("titulo", "Factura: " + factura.getDescripcion());
+        model.addAttribute("factura", factura);
+        return "factura/ver";
+    }
+
+    @GetMapping(value = "/cargar-productos/{term}", produces = {"application/json"})
+//Mismo mapping que le dimos en /js/autocomplete-producto dentro de ajax,
+    // con Jquery. Despues lo que hace
+    //Es generar y productir una respuesta JSON.
+    //El @ResponseBody lo que hace es suprimir el cargar una
+    //vista de Thymeleaf, y en vez de eso toma el resultado y lo convierte en JSON
+    public @ResponseBody
+    List<Producto> cargarProductos(@PathVariable String term) {
         return clienteService.findByNombreLikeIgnoreCase(term);
     }
 
@@ -71,20 +71,20 @@ public class FacturaController {
     public String guardar(@Valid Factura factura, BindingResult result, Model model,
                           @RequestParam(name = "item_id[]", required = false) Long[] itemId,
                           @RequestParam(name = "cantidad[]", required = false) Integer[] cantidad,
-                          RedirectAttributes flash, SessionStatus status){
+                          RedirectAttributes flash, SessionStatus status) {
 
-        if (result.hasErrors()){
+        if (result.hasErrors()) {
             model.addAttribute("titulo", "Crear Factura");
             return "factura/form";
         }
-        if (itemId == null || itemId.length == 0){
+        if (itemId == null || itemId.length == 0) {
             model.addAttribute("titulo", "Crear Factura");
             model.addAttribute("error", "Error: La factura NO puede no tener lineas!");
             return "factura/form";
         }
 
 
-        for (int i = 0; i < itemId.length; i++){
+        for (int i = 0; i < itemId.length; i++) {
             Producto producto = clienteService.findProductoById(itemId[i]);
 
             ItemFactura linea = new ItemFactura();
@@ -100,5 +100,19 @@ public class FacturaController {
 
         return "redirect:/ver/" + factura.getCliente().getId().toString();
     }
+
+    @GetMapping("eliminar/{id}")
+    public String eliminar(@PathVariable Long id, RedirectAttributes flash) {
+
+        Factura factura = clienteService.findFacturaById(id);
+        if (factura != null) {
+            clienteService.deleteFactura(id);
+            flash.addFlashAttribute("succes", "Factura eliminada con exito");
+            return "redirect:/ver/" + factura.getCliente().getId();
+        }
+        flash.addFlashAttribute("error", "La factura no existe en la BD");
+        return "redirect:/listar";
+    }
+
 
 }

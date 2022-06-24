@@ -27,20 +27,27 @@ public class Cliente implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     //@Column(name = "NOMBRE_CLIENTE", ) //Esto es si el atributo se llama "nombre", pero en la base de datos se llama "nombre_cliente" por ejemplo
     @NotEmpty(message = "El nombre debe tener entre 4 y 11 caracteres")
     @Size(min = 4, max = 11, message = "")
     private String nombre;
+
+
     @NotEmpty(message = "El apellido no puede estar vacio")
     private String apellido;
+
+
     @NotEmpty(message = "El email no es valido o no puede estar vacio")
     //@Email
     private String email;
+
 
 //    @NotNull
     @Column(name = "create_at")
     @Temporal(TemporalType.DATE)
     private Date createAt;
+
 
     @NotNull(message = "La fecha no puede ser nula")
     //para validar el formato de la fecha y darle un mensaje, en el messages.properties podemos poner typeMismatch.cliente.fechaNuestra = Formato de la fecha no es valido
@@ -48,7 +55,10 @@ public class Cliente implements Serializable {
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private Date fechaNuestra;
 
+
     private String foto;
+
+
     @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     //Toda las operaciones ejemplo delete, o persist se hacen en cascada. Por ejemplo cuando al cliente se le asignan varias facturas
     private List<Factura> facturas;

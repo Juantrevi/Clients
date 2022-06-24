@@ -19,14 +19,18 @@ public class Factura implements Serializable {
     @NotEmpty(message = "No puede estar vacio")
     private String descripcion;
 
+
     private String observacion;
+
 
     @Temporal(TemporalType.DATE)
     @Column(name = "create_at")
     private Date createAt;
 
+
     @ManyToOne(fetch = FetchType.LAZY)//Para solo consultar a medida que se invocan los metodos, y que no haga consulta a toda la BD, solo hace la consulta cuando se lo llama
     private Cliente cliente;
+
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "factura_id")

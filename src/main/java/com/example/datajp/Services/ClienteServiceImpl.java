@@ -29,17 +29,28 @@ public class ClienteServiceImpl implements IClienteService{
     public List<Cliente> findAll() {
         return (List<Cliente>) clienteDao.findAll();
     }
+
+
     @Transactional
     @Override
     public void save(Cliente cliente) {
         clienteDao.save(cliente);
     }
 
+
     @Transactional
     @Override
     public Cliente findOne(Long id) {
         return clienteDao.findById(id).orElse(null);
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Cliente fetchByIdWithFacturas(Long id) {
+        return clienteDao.fetchByIdWithFacturas(id);
+    }
+
 
     @Transactional
     @Override
@@ -55,6 +66,7 @@ public class ClienteServiceImpl implements IClienteService{
         return clienteDao.findAll(pageable);
     }
 
+
     @Transactional(readOnly = true)
     @Override
     public List<Producto> findByNombreLikeIgnoreCase(String term) {
@@ -62,11 +74,13 @@ public class ClienteServiceImpl implements IClienteService{
         return productoDao.findByNombreLikeIgnoreCase("%" + term + "%");
     }
 
+
     @Override
     @Transactional
     public void saveFactura(Factura factura) {
         facturaDao.save(factura);
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -74,9 +88,26 @@ public class ClienteServiceImpl implements IClienteService{
         return productoDao.findById(id).orElse(null);
     }
 
+
     @Override
     @Transactional(readOnly = true)
     public Factura findFacturaById(Long id) {
         return facturaDao.findById(id).orElse(null);
     }
+
+
+    @Override
+    @Transactional
+    public void deleteFactura(Long id) {
+        facturaDao.deleteById(id);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public Factura fetchByIdWithClienteWithItemFacturaWithProducto(Long id) {
+        return facturaDao.fetchByIdWithClienteWithItemFacturaWithProducto(id);
+    }
+
+
 }

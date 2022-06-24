@@ -1,7 +1,11 @@
 package com.example.datajp.Services;
 
+import com.example.datajp.Entities.Factura;
+import com.example.datajp.Entities.Producto;
 import com.example.datajp.Repository.IClienteDao;
 import com.example.datajp.Entities.Cliente;
+import com.example.datajp.Repository.IFacturaDao;
+import com.example.datajp.Repository.IproductoDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +19,11 @@ public class ClienteServiceImpl implements IClienteService{
 
     @Autowired
     private IClienteDao clienteDao;
+    @Autowired
+    private IproductoDao productoDao;
+    @Autowired
+    private IFacturaDao facturaDao;
+
     @Transactional(readOnly = true)
     @Override
     public List<Cliente> findAll() {
@@ -46,4 +55,28 @@ public class ClienteServiceImpl implements IClienteService{
         return clienteDao.findAll(pageable);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public List<Producto> findByNombreLikeIgnoreCase(String term) {
+
+        return productoDao.findByNombreLikeIgnoreCase("%" + term + "%");
+    }
+
+    @Override
+    @Transactional
+    public void saveFactura(Factura factura) {
+        facturaDao.save(factura);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Producto findProductoById(Long id) {
+        return productoDao.findById(id).orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Factura findFacturaById(Long id) {
+        return facturaDao.findById(id).orElse(null);
+    }
 }

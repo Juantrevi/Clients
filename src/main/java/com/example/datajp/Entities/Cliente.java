@@ -8,7 +8,9 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "clientes")
@@ -47,6 +49,9 @@ public class Cliente implements Serializable {
     private Date fechaNuestra;
 
     private String foto;
+    @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    //Toda las operaciones ejemplo delete, o persist se hacen en cascada. Por ejemplo cuando al cliente se le asignan varias facturas
+    private List<Factura> facturas;
 
     @PrePersist
     public void prePersist(){
@@ -54,6 +59,7 @@ public class Cliente implements Serializable {
     }
 
     public Cliente() {
+        facturas = new ArrayList<Factura>();
     }
 
     public Cliente(Long id, String nombre, String apellido, String email, Date createAt, Date fechaNuestra) {
@@ -119,5 +125,22 @@ public class Cliente implements Serializable {
 
     public void setFoto(String foto) {
         this.foto = foto;
+    }
+
+    public List<Factura> getFacturas() {
+        return facturas;
+    }
+
+    public void setFacturas(List<Factura> facturas) {
+        this.facturas = facturas;
+    }
+
+    public void addFactura(Factura factura){
+        facturas.add(factura);
+    }
+
+    @Override
+    public String toString() {
+        return nombre + " " + apellido;
     }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://thymeleaf.org">
+<html xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org/extras/spring-security">
+
 <head th:fragment="head">
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -28,6 +29,25 @@
                         <a class="nav-link" th:href="@{/listar}">Clientes</a>
                     </li>
                 </ul>
+                <ul class="navbar-nav nav-end align-items-end">
+                    <li sec:authorize="!isAuthenticated()"><a class="btn btn-outline-primary" th:href="@{/login}">Sign
+                        In</a></li>
+
+                    <li sec:authorize="isAuthenticated()" class="dropdown">
+                        <a class="btn btn-outline-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <span sec:authentication="name"></span>
+                        </a>
+
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <form id="logoutForm" th:action="@{/logout}" method="POST">
+                                <button class="dropdown-item" onclick="document.getElementById('logoutForm').submit();" type="submit">Sign
+                                    Out
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -38,6 +58,12 @@
 </header>
 <footer th:fragment="footer" class="container">
     <img th:src="@{/images/spring.png}" alt="Spring Logo">
+
+    <p sec:authorize="isAuthenticated()">
+        Usuario Logueado: <span sec:authentication="name"></span> | Roles: <span
+            sec:authentication="principal.authorities"></span>
+    </p>
+
     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. At atque autem beatae consequuntur culpa dicta et
         facilis hic itaque laudantium, maxime modi natus necessitatibus optio pariatur repellendus totam ullam unde!</p>
 

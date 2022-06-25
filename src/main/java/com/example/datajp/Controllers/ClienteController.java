@@ -125,7 +125,7 @@ public class ClienteController {
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"" ).body(recurso);
     }
 
-    @GetMapping("/listar")
+    @GetMapping({"/listar", "/"})
     public String listar(@RequestParam(value = "page", defaultValue = "0") int page, Model model){
 
         //Asi es como traemos una cantidad de elementos por pagina

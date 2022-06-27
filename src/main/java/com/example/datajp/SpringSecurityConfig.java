@@ -1,31 +1,37 @@
 package com.example.datajp;
 
 import com.example.datajp.Auth.Handler.LoginSuccesHandler;
+import com.example.datajp.Services.JpaUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static org.springframework.security.config.Customizer.withDefaults;
 
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true) //Para usar las anotaciones @Secured y @PreAuthorize en los controladores
 @Configuration
 public class SpringSecurityConfig {
 
     @Autowired
     private LoginSuccesHandler succesHandler;
+    @Autowired
+    private MvcConfig mvcConfig;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private JpaUserDetailsService jpaUserDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests().antMatchers("/", "/css/**", "/js/**", "/images/**", "/listar").permitAll()
+        http.authorizeHttpRequests().antMatchers("/", "/css/**", "/js/**", "/images/**", "/listar", "/locale").permitAll()
                 .antMatchers("/ver/**").hasAnyRole("USER")
                 .antMatchers("/uploads/**").hasAnyRole("USER")
                 .antMatchers("/form/**").hasAnyRole("ADMIN")
@@ -44,21 +50,10 @@ public class SpringSecurityConfig {
     }
 
 
-    @Bean
-    public static BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
-
-    @Bean
-    public UserDetailsService userDetailsService() throws Exception {
-
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-
-        manager.createUser(User.withUsername("juantrevi70@gmail.com").password(passwordEncoder().encode("34813589")).roles("USER").build());
-        manager.createUser(User.withUsername("admin").password(passwordEncoder().encode("admin")).roles("ADMIN", "USER").build());
-
-        return manager;
-    }
+@Autowired
+    public void configurerGlobal(AuthenticationManagerBuilder build) throws Exception{
+        build.userDetailsService(jpaUserDetailsService).passwordEncoder(passwordEncoder);
+}
 
 }

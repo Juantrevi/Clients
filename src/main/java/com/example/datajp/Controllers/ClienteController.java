@@ -6,12 +6,18 @@ import com.example.datajp.Services.IClienteService;
 import com.example.datajp.Services.IUploadFileService;
 import com.example.datajp.util.paginator.PageRender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,7 +30,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.MalformedURLException;
-
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Locale;
 
 
 @Controller
@@ -36,9 +44,11 @@ public class ClienteController {
     private IClienteService clienteService;
     @Autowired
     private IUploadFileService uploadFileService;
+    @Autowired
+    private MessageSource messageSource;
 
 
-
+    @Secured("ROLE_ADMIN")
     @GetMapping("/form")
     public String crear(Model model){
 
@@ -53,6 +63,7 @@ public class ClienteController {
     //FUNDAMENTAL PARA LAS VALIDACIONES anotar con @Valid, pero si falla hay que preguntar si contiene errores
     //Hay que cargar la vista del formulario y volver a la plantilla con los mensajes de error, para eso hay que
     //agregar otro objeto como argumento, el BindingResult, siempre junto al objeto (En este caso el cliente)
+    @Secured("ROLE_ADMIN")
     @PostMapping("/form")
     public String guardar(@Valid Cliente cliente, BindingResult result, Model model, @RequestParam("file") MultipartFile foto, RedirectAttributes flash, SessionStatus status){
 
@@ -94,6 +105,7 @@ public class ClienteController {
 
     //Pageable se usa para mostrar una cantidad de registros determinados (Modificar Interfaz y service) y en otro controlador (util.paginator)
 
+    @Secured("ROLE_USER")
     @GetMapping("/ver/{id}")
     public String ver(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash){
 
@@ -113,6 +125,7 @@ public class ClienteController {
     //de la otra manera lo carga como un recurso, pero hay que configurarlo en el MvcConfig (Ahora comentado)
     //Es decir, de esta forma lo busca directamente a traves de la respuesta resource, se cargan los recursos y se pasan a la respuesta, anexandolo al body
     //Ambas formas estan bien, esta solo la carga a traves de una metodo handler
+    @Secured("ROLE_USER")
     @GetMapping(value = "/uploads/{filename:.+}") //el .+ al final es para que no pase el .PNG por ejemplo
     public ResponseEntity<Resource> verFoto(@PathVariable String filename){
 
@@ -126,7 +139,8 @@ public class ClienteController {
     }
 
     @GetMapping({"/listar", "/"})
-    public String listar(@RequestParam(value = "page", defaultValue = "0") int page, Model model){
+    public String listar(@RequestParam(value = "page", defaultValue = "0") int page, Model model, Locale locale){
+
 
         //Asi es como traemos una cantidad de elementos por pagina
         Pageable pageRequest = PageRequest.of(page, 4);
@@ -135,13 +149,14 @@ public class ClienteController {
         //
 
 
-        model.addAttribute("titulo", "Listado de clientes");
+        model.addAttribute("titulo", messageSource.getMessage("text.cliente.listar.titulo", null, locale));
         model.addAttribute("clientes", clientes); //Para traer solo 4
 //        model.addAttribute("clientes", clienteService.findAll()); --> SI QUISIERAMOS TRAER TODA LA LISTA
         model.addAttribute("page", pageRender);
         return "listar";
     }
 
+    @Secured("ROLE_ADMIN")
     @GetMapping("/form/{id}")
     public String editar(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash){
 
@@ -163,6 +178,7 @@ public class ClienteController {
         return "form";
     }
 
+    @Secured("ROLE_ADMIN")
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable(value = "id") Long id, RedirectAttributes flash){
 
@@ -179,5 +195,6 @@ public class ClienteController {
 
         return "redirect:/listar";
     }
+
 
 }

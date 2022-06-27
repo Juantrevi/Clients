@@ -6,6 +6,7 @@ import com.example.datajp.Entities.ItemFactura;
 import com.example.datajp.Entities.Producto;
 import com.example.datajp.Services.IClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +20,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/factura")
 @SessionAttributes("factura")
+@Secured("ROLE_ADMIN")
 public class FacturaController {
 
     @Autowired
@@ -57,7 +59,7 @@ public class FacturaController {
     }
 
     @GetMapping(value = "/cargar-productos/{term}", produces = {"application/json"})
-//Mismo mapping que le dimos en /js/autocomplete-producto dentro de ajax,
+    //Mismo mapping que le dimos en /js/autocomplete-producto dentro de ajax,
     // con Jquery. Despues lo que hace
     //Es generar y productir una respuesta JSON.
     //El @ResponseBody lo que hace es suprimir el cargar una

@@ -1,5 +1,8 @@
 package com.example.datajp.Entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -46,6 +49,8 @@ public class Cliente implements Serializable {
 //    @NotNull
     @Column(name = "create_at")
     @Temporal(TemporalType.DATE)
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date createAt;
 
 
@@ -53,6 +58,7 @@ public class Cliente implements Serializable {
     //para validar el formato de la fecha y darle un mensaje, en el messages.properties podemos poner typeMismatch.cliente.fechaNuestra = Formato de la fecha no es valido
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private Date fechaNuestra;
 
 
@@ -60,6 +66,7 @@ public class Cliente implements Serializable {
 
 
     @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     //Toda las operaciones ejemplo delete, o persist se hacen en cascada. Por ejemplo cuando al cliente se le asignan varias facturas
     private List<Factura> facturas;
 

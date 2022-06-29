@@ -5,6 +5,7 @@ import com.example.datajp.Entities.Cliente;
 import com.example.datajp.Services.IClienteService;
 import com.example.datajp.Services.IUploadFileService;
 import com.example.datajp.util.paginator.PageRender;
+import com.example.datajp.view.Xml.ClienteList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.Resource;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -196,5 +198,18 @@ public class ClienteController {
         return "redirect:/listar";
     }
 
+    //Asi se hace un REST, con JSON, el problema es que no podriamos obtener el XML, si quisieramos los dos se muestra mas abajo
+    @GetMapping("/listar-rest")
+    public @ResponseBody List<Cliente> listarREST() {
+
+        return clienteService.findAll();
+    }
+
+//    //Asi obtendriamos los dos, JSON y XML
+//    @GetMapping("/listar-rest")
+//    public @ResponseBody ClienteList listarREST() {
+//
+//        return new ClienteList(clienteService.findAll());
+//    }
 
 }

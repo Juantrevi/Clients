@@ -1,6 +1,8 @@
 package com.example.datajp.Entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.io.Serializable;
 @Entity
@@ -18,6 +20,7 @@ public class ItemFactura implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id") //Aunque se va a relacionar solo, se lo puede dejar de forma explicita, pero se podria omitir
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Producto producto;
 
 
